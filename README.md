@@ -1,1 +1,1 @@
-# python-flask-rest-api-example
+# Example of a rest api with flask and python
