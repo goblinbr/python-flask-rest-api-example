@@ -17,7 +17,11 @@ def not_found(error):
 @app.errorhandler(NoJsonException)
 @app.errorhandler(400)
 def bad_request(error):
-    msg = error.msg if hasattr(error, 'msg') else 'Bad request'
+    msg = 'Bad request'
+    if hasattr(error, 'msg'):
+        msg = error.msg
+    elif hasattr(error, 'description') and error.description.startswith('Failed to decode JSON'):
+        msg = 'Invalid JSON'
     return make_response('{"error": "%s"}' % msg, 400)
 
 
