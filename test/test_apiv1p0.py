@@ -154,20 +154,23 @@ class TestApiv1p0(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual('Todo %s not found' % created_todo['id'], data['error'])
 
-    def test_get_invalid_route(self):
+    def test_calls_to_invalid_routes(self):
         response = self.server.get('/api/v1.0/banana', headers=self.headers_user1)
         self.assertEqual(404, response.status_code)
         data = json.loads(response.data)
         self.assertEqual('Not found', data['error'])
 
-    def test_post_invalid_route(self):
         response = self.server.post('/api/v1.0/banana', data='{"title": "Test"}', headers=self.headers_user1)
         self.assertEqual(404, response.status_code)
         data = json.loads(response.data)
         self.assertEqual('Not found', data['error'])
 
-    def test_put_invalid_route(self):
         response = self.server.put('/api/v1.0/banana/1', data='{"title": "Test"}', headers=self.headers_user1)
+        self.assertEqual(404, response.status_code)
+        data = json.loads(response.data)
+        self.assertEqual('Not found', data['error'])
+
+        response = self.server.delete('/api/v1.0/banana/1', headers=self.headers_user1)
         self.assertEqual(404, response.status_code)
         data = json.loads(response.data)
         self.assertEqual('Not found', data['error'])
@@ -189,7 +192,7 @@ class TestApiv1p0(unittest.TestCase):
         response = self.server.delete('/api/v1.0/todo/%s' % created_todo['id'])
         self.assertEqual(401, response.status_code)
 
-    def test_with_invalid_token(self):
+    def test_calls_with_invalid_token(self):
         headers = {'Authorization' : 'token not-a-valid-token'}
 
         created_todo = database.create_todo(self.user1, {"title": "Test todo"})
