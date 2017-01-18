@@ -4,11 +4,10 @@ import datetime
 
 
 class DB(object):
-    rows = []
-    last_id = 0
-
     def __init__(self,fields):
         self.fields = fields
+        self.rows = []
+        self.last_id = 0
 
     def clear(self):
         self.rows = []
