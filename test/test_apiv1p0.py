@@ -208,6 +208,20 @@ class TestApiv1p0(unittest.TestCase):
         response = self.server.delete('/api/v1.0/todo/%s' % created_todo['id'], headers=headers)
         self.assertEqual(401, response.status_code)
 
+    def test_calls_with_user_token_as_url_param(self):
+        response = self.server.post('/api/v1.0/todo?token=%s' % self.user1['token'], data='{"title": "Test todo"}', content_type='application/json')
+        self.assertEqual(201, response.status_code)
+        created_todo = data = json.loads(response.data)
+
+        response = self.server.get('/api/v1.0/todo/%s?token=%s' % (created_todo['id'], self.user1['token']))
+        self.assertEqual(200, response.status_code)
+
+        response = self.server.put('/api/v1.0/todo/%s?token=%s' % (created_todo['id'], self.user1['token']), data='{"title": "Renamed test todo"}', content_type='application/json')
+        self.assertEqual(201, response.status_code)
+
+        response = self.server.delete('/api/v1.0/todo/%s?token=%s' % (created_todo['id'], self.user1['token']))
+        self.assertEqual(201, response.status_code)
+
 
 if __name__ == '__main__':
     unittest.main()
