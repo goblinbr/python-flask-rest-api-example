@@ -6,11 +6,14 @@ import datetime
 class DB(object):
     rows = []
     last_id = 0
+
     def __init__(self,fields):
         self.fields = fields
+
     def clear(self):
         self.rows = []
         self.last_id = 0
+
     def create(self,obj):
         obj = {k: v for k, v in obj.items() if k in self.fields}
         self.last_id += 1
@@ -19,7 +22,7 @@ class DB(object):
         return obj
 
 
-__todo_db = DB(['title', 'done'])
+__todo_db = DB(['title', 'done', 'user_id'])
 __user_db = DB(['name', 'token'])
 
 
@@ -30,29 +33,31 @@ def clear():
     __user_db.clear()
 
 
-def get_todo_list():
+def get_todo_list(user):
     global __todo_db
-    return __todo_db.rows
+    lst = [t for t in __todo_db.rows if t['user_id'] == user['id']]
+    return lst
 
 
-def get_todo(todo_id=0):
+def get_todo(user,todo_id):
     global __todo_db
-    lst = [t for t in __todo_db.rows if t['id'] == todo_id]
+    lst = [t for t in __todo_db.rows if t['id'] == todo_id and t['user_id'] == user['id']]
     return lst[0] if len(lst) > 0 else None
 
 
-def create_todo(todo):
+def create_todo(user, todo):
     global __todo_db
     if 'title' not in todo:
         raise DatabaseValidationException('Title is a required field')
     todo['done'] = False
+    todo['user_id'] = user['id']
     todo = __todo_db.create(todo)
     return todo
 
 
-def update_todo(todo_id, todo):
-    global __todo_fields
-    db_todo = get_todo(todo_id)
+def update_todo(user, todo_id, todo):
+    global __todo_db
+    db_todo = get_todo(user, todo_id)
     if db_todo is not None:
         for field in __todo_db.fields:
             if field != 'id' and field in todo:
@@ -60,9 +65,9 @@ def update_todo(todo_id, todo):
     return db_todo
 
 
-def delete_todo(todo_id):
+def delete_todo(user, todo_id):
     global __todo_db
-    db_todo = get_todo(todo_id)
+    db_todo = get_todo(user, todo_id)
     if db_todo is not None:
         __todo_db.rows.remove(db_todo)
     return db_todo

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
 from app import database
 from app.exceptions import NotFoundException, NoJsonException
 from app.authentication import auth
@@ -14,13 +14,13 @@ def validate_json(json):
 @blueprint.route('/todo', methods=['GET'])
 @auth.login_required
 def get_todo_list():
-    return jsonify(database.get_todo_list())
+    return jsonify(database.get_todo_list(g.user))
 
 
 @blueprint.route('/todo/<int:todo_id>', methods=['GET'])
 @auth.login_required
 def get_todo(todo_id):
-    todo = database.get_todo(todo_id)
+    todo = database.get_todo(g.user, todo_id)
     if todo is None:
         raise NotFoundException('Todo %s not found' % todo_id)
     else:
@@ -31,7 +31,7 @@ def get_todo(todo_id):
 @auth.login_required
 def create_todo():
     validate_json(request.json)
-    todo = database.create_todo(request.json)
+    todo = database.create_todo(g.user, request.json)
     return jsonify(todo), 201
 
 
@@ -39,7 +39,7 @@ def create_todo():
 @auth.login_required
 def update_todo(todo_id):
     validate_json(request.json)
-    todo = database.update_todo(todo_id, request.json)
+    todo = database.update_todo(g.user, todo_id, request.json)
     if todo is None:
         raise NotFoundException('Todo %s not found' % todo_id)
     else:
@@ -49,7 +49,7 @@ def update_todo(todo_id):
 @blueprint.route('/todo/<int:todo_id>', methods=['DELETE'])
 @auth.login_required
 def delete_todo(todo_id):
-    todo = database.delete_todo(todo_id)
+    todo = database.delete_todo(g.user, todo_id)
     if todo is None:
         raise NotFoundException('Todo %s not found' % todo_id)
     else:
