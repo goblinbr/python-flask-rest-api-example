@@ -154,6 +154,21 @@ class TestApiv1p0(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual('Todo %s not found' % created_todo['id'], data['error'])
 
+    def test_create_user(self):
+        response = self.server.post('/api/v1.0/user', data='{"name": "new user"}', content_type='application/json')
+        self.assertEqual(201, response.status_code)
+        user = json.loads(response.data)
+        self.assertEqual('new user', user['name'])
+
+        response = self.server.post('/api/v1.0/todo?token=%s' % user['token'], data='{"title": "Test todo"}', content_type='application/json')
+        self.assertEqual(201, response.status_code)
+        data = json.loads(response.data)
+
+        response = self.server.get('/api/v1.0/todo?token=%s' % user['token'])
+        self.assertEqual(200, response.status_code)
+        todos = json.loads(response.data)
+        self.assertEqual(1, len(todos))
+
     def test_calls_to_invalid_routes(self):
         response = self.server.get('/api/v1.0/banana', headers=self.headers_user1)
         self.assertEqual(404, response.status_code)

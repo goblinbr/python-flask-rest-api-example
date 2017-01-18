@@ -54,3 +54,10 @@ def delete_todo(todo_id):
         raise NotFoundException('Todo %s not found' % todo_id)
     else:
         return jsonify(todo), 201
+
+
+@blueprint.route('/user', methods=['POST'])
+def create_user():
+    validate_json(request.json)
+    user = database.create_user(request.json)
+    return jsonify(user), 201
